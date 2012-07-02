@@ -7,19 +7,35 @@ fs = require('fs');
 PIC_FOLDER = "pics"
 
 postcards = 
-  neptune: "4.2 hours",
-  voyager: "16 hours",
-  proxima: "4.2 years"
+  neptune: 
+    minutes: 12
+  voyager: 
+    hours: 16           
+  proxima:
+    years: 4
+    days: 73     
+
 
 # Filename must be formatted: 
-# christina.lin.yang@gmail.com_2012.06.30-08/43/02
+# christina.lin.yang@gmail.com_2012.06.30-08/43/02_neptune
 
 parseDataEmail = (filename)=>
-  emailAddress = filename.split("_")[0]
-  dateTime = new Date(filename.split("_")[1])
-  {email: emailAddress, date: dateTime}
+  file = filename.split("_")
+  
+  emailAddress = file[0]
+  created = new Date( file[1] )
+  cardOrigin = file[2]
+  
+  newDate = addLightYears( created, cardOrigin )
+  
+  { email: emailAddress, date: newDate, origin: cardOrigin }
 
 
+addLightYears = (cardCreated, cardOrigin) =>
+  
+  now = Date.today().setTimeToNow() 
+  now.add( postcards[ cardOrigin ] )  
+  
 server  = email.server.connect
    user:    "adlerphotoemail" 
    password:"adlerPhotoEmail"
@@ -56,7 +72,7 @@ sendEmail = (sendDate, address) =>
 treeWalk = -> 
   folder = fs.readdirSync(PIC_FOLDER)         
   
-  for pic in folder when pic isnt ".DS_Store"    
+  for pic in folder when pic isnt ".DS_Store"
     currPic = parseDataEmail ( pic.toString() )
     toSend = Date.compare( currPic.date, Date.today().setTimeToNow() )
     
