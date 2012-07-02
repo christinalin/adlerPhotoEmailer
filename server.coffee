@@ -31,25 +31,26 @@ watch.createMonitor PIC_FOLDER, (monitor)=>
   monitor.on "created", (f,stat)=>
     details = parseDataEmail(f)
     console.log "scheduling email"
-    schedule.scheduleJob details.date, =>
-      console.log "sending to #{details.email}"
-      
-      schedule.scheduleJob details.date, =>
-      console.log "sending to #{details.email}"
-      server.send
-        text:    "i hope this works"
-        from:    "The adler <username@gmail.com>"
-        to:      details.email
-        subject: "testing emailjs"
-        attachment: [
-          data: "<html>i <i>hope</i> this works!</html>"          
-          ,
-          type: "image/png"
-          path: "pics/test.png"
-          ]
-          
-      , (err, message)=>
-        console.log err || message
+    sendEmail( details.date, details.email )
+    
+sendEmail = (sendDate, address) =>
+
+  schedule.scheduleJob sendDate, =>
+  console.log "sending to #{address}"
+  server.send
+    text:    "i hope this works"
+    from:    "The adler <username@gmail.com>"
+    to:      address
+    subject: "testing emailjs"
+    attachment: [
+      data: "<html>i <i>hope</i> this works!</html>"          
+      ,
+      type: "image/png"
+      path: "pics/test.png"
+      ]
+    
+  , (err, message)=>
+    console.log err || message
         
         
 
