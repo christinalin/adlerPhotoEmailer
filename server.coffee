@@ -17,7 +17,7 @@ postcards =
 parseDataEmail = (filename)=>
   emailAddress = filename.split("_")[0]
   dateTime = new Date(filename.split("_")[1])
-  {email: emailAddress.split("/")[1], date: dateTime}
+  {email: emailAddress, date: dateTime}
 
 
 server  = email.server.connect
@@ -29,7 +29,7 @@ server  = email.server.connect
 
 watch.createMonitor PIC_FOLDER, (monitor)=> 
   monitor.on "created", (f,stat)=>
-    details = parseDataEmail(f)
+    details = parseDataEmail(f.split("/")[1])
     console.log "scheduling email"
     sendEmail( details.date, details.email )
     
@@ -37,6 +37,7 @@ sendEmail = (sendDate, address) =>
 
   schedule.scheduleJob sendDate, =>
   console.log "sending to #{address}"
+  
   server.send
     text:    "i hope this works"
     from:    "The adler <username@gmail.com>"
@@ -52,16 +53,15 @@ sendEmail = (sendDate, address) =>
   , (err, message)=>
     console.log err || message
         
-        
-
 treeWalk = -> 
-  folder = fs.readdirSync(PIC_FOLDER)
+  folder = fs.readdirSync(PIC_FOLDER)         
   
-  for pic in folder when pic isnt ".DS_Store"
+  for pic in folder when pic isnt ".DS_Store"    
     currPic = parseDataEmail ( pic.toString() )
-    now = Date.today().setTimeToNow()
-    picDateTime = currPic.date
+    toSend = Date.compare( currPic.date, Date.today().setTimeToNow() )
     
-    console.log picDateTime 
+    if toSend == 0 or toSend == 1    
+      sendEmail( currPic.date, currPic.email )
+    
 
 treeWalk()     
