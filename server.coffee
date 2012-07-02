@@ -4,6 +4,12 @@ schedule= require('node-schedule')
 require('datejs')
 fs = require('fs');
 
+
+# Filename must be formatted: 
+# christina.lin.yang@gmail.com_2012.06.30-08/43/02_neptune
+
+
+
 PIC_FOLDER = "pics"
 
 postcards = 
@@ -16,8 +22,9 @@ postcards =
     days: 73     
 
 
-# Filename must be formatted: 
-# christina.lin.yang@gmail.com_2012.06.30-08/43/02_neptune
+
+# - - - - - parseDataEmail 
+# - - - - - Parse essential info out of the filename
 
 parseDataEmail = (filename)=>
   file = filename.split("_")
@@ -26,22 +33,33 @@ parseDataEmail = (filename)=>
   created = new Date( file[1] )
   cardOrigin = file[2]
   
-  newDate = addLightYears( created, cardOrigin )
+  newDate = calculateSendDate( created, cardOrigin )
   
   { email: emailAddress, date: newDate, origin: cardOrigin }
 
 
-addLightYears = (cardCreated, cardOrigin) =>
+
+# - - - - - calculateSendDate
+# - - - - - Calculate the date to send the email 
+
+calculateSendDate = (cardCreated, cardOrigin) =>
   
   now = Date.today().setTimeToNow() 
   now.add( postcards[ cardOrigin ] )  
-  
+ 
+ 
+ 
+# - - - - - Connect to the mail server 
+ 
 server  = email.server.connect
    user:    "adlerphotoemail" 
    password:"adlerPhotoEmail"
    host:    "smtp.gmail.com"
    ssl:     true
+   
+   
 
+# - - - - - Monitor the picture folder for filechanges
 
 watch.createMonitor PIC_FOLDER, (monitor)=> 
   monitor.on "created", (f,stat)=>
@@ -49,6 +67,11 @@ watch.createMonitor PIC_FOLDER, (monitor)=>
     console.log "scheduling email"
     sendEmail( details.date, details.email )
     
+    
+    
+# - - - - - sendEmail 
+# - - - - - Send an email based on a certain date 
+
 sendEmail = (sendDate, address) =>
 
   schedule.scheduleJob sendDate, =>
@@ -69,6 +92,10 @@ sendEmail = (sendDate, address) =>
   , (err, message)=>
     console.log err || message
         
+        
+# - - - - - treeWalk 
+# - - - - - Walk through the picture folder and schedule images to be sent
+
 treeWalk = -> 
   folder = fs.readdirSync(PIC_FOLDER)         
   
