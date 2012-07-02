@@ -42,9 +42,7 @@ watch.createMonitor PIC_FOLDER, (monitor)=>
         to:      details.email
         subject: "testing emailjs"
         attachment: [
-          data: "<html>i <i>hope</i> this works!</html>"
-          ]
-          
+          data: "<html>i <i>hope</i> this works!</html>"          
           ,
           type: "image/png"
           path: "pics/test.png"

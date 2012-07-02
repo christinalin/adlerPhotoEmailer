@@ -7,6 +7,7 @@
       "emailjs": "latest",
       "node-schedule" : "latest",
       "watch" : "latest",
-      "datejs" : "latest"
+      "datejs" : "latest",
+      "fs" : "latest"
   }
 }
