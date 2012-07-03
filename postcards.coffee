@@ -1,5 +1,3 @@
-require("datejs")
-
 module.exports =
   neptune: 
     hours: 4
