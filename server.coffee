@@ -36,8 +36,7 @@ parseDataEmail = (filename)=>
 
 calculateSendDate = (cardCreated, cardOrigin) =>
   
-  now = Date.today().setTimeToNow()
-  now.add( postcards[ cardOrigin ] )  
+  cardCreated.add( postcards[ cardOrigin ] )  
  
  
  
@@ -70,6 +69,7 @@ sendEmail = (sendDate, address, f) =>
 
   schedule.scheduleJob sendDate, =>
   console.log "sending to #{address}"
+  
   
   server.send
     text:    "i hope this works"
