@@ -7,13 +7,14 @@ fs = require('fs');
 
 # Filename must be formatted: 
 # christina.lin.yang@gmail.com_2012.06.30-08/43/02_neptune
-
+# email_year.month.year-hour/minute/second_origin
 
 
 PIC_FOLDER = "pics"
 
 postcards = 
   neptune: 
+    hours: 4
     minutes: 12
   voyager: 
     hours: 16           
