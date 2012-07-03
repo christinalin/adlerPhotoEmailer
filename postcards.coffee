@@ -1,4 +1,6 @@
 module.exports =
+  short:
+    seconds: 30
   neptune: 
     hours: 4
     minutes: 12

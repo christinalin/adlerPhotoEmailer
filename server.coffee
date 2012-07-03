@@ -2,7 +2,8 @@ watch = require('watch')
 email = require('emailjs')
 schedule= require('node-schedule')
 require('datejs')
-fs = require('fs');
+fs = require('fs')
+eco = require('eco')
 
 postcards = require('./postcards')
 
@@ -12,7 +13,7 @@ postcards = require('./postcards')
 
 
 PIC_FOLDER = "pics"
-
+template   = fs.readFileSync 'emailTemplate.eco', 'utf-8'
 
 
 # - - - - - parseDataEmail 
@@ -27,7 +28,12 @@ parseDataEmail = (filename)=>
   
   newDate = calculateSendDate( created, cardOrigin )
   
-  { email: emailAddress, date: newDate, origin: cardOrigin }
+  console.log "created on #{created}"
+  
+  email   : emailAddress
+  date    : newDate
+  created : created
+  origin  : cardOrigin
 
 
 
@@ -43,10 +49,10 @@ calculateSendDate = (cardCreated, cardOrigin) =>
 # - - - - - Connect to the mail server 
  
 server  = email.server.connect
-   user:    "adlerphotoemail" 
-   password:"adlerPhotoEmail"
-   host:    "smtp.gmail.com"
-   ssl:     true
+   user     : "adleremailer2" 
+   password : "Neptune2012!"
+   host     : "smtp.gmail.com"
+   ssl      : true
    
    
 
@@ -54,33 +60,33 @@ server  = email.server.connect
 
 watch.createMonitor PIC_FOLDER, (monitor)=> 
   monitor.on "created", (f,stat)=>
-  
+    
     fname = f.split("/")[1]
     details = parseDataEmail( fname )
     console.log "scheduling email"
-    sendEmail( details.date, details.email, fname )
+    sendEmail( details, fname )
     
     
     
 # - - - - - sendEmail 
 # - - - - - Send an email based on a certain date 
 
-sendEmail = (sendDate, address, f) =>
-
-  schedule.scheduleJob sendDate, =>
-  console.log "sending to #{address}"
+sendEmail = (details, fname) =>
+  
+  schedule.scheduleJob details.date, =>
+  console.log "sending to #{details.email} on #{details.date}"
   
   
   server.send
-    text:    "i hope this works"
+    text:    eco.render template, details
     from:    "The adler <username@gmail.com>"
-    to:      address
+    to:      details.email
     subject: "testing emailjs"
     attachment: [
       data: "<html>i <i>hope</i> this works!</html>"          
       ,
       type: "image/png"
-      path: "#{PIC_FOLDER}/#{f}"
+      path: "#{PIC_FOLDER}/#{fname}"
       ]
     
   , (err, message)=>
@@ -94,11 +100,12 @@ treeWalk = ->
   folder = fs.readdirSync(PIC_FOLDER)         
   
   for pic in folder when pic isnt ".DS_Store"
+    console.log "----------"
     currPic = parseDataEmail ( pic.toString() )
     toSend = Date.compare( currPic.date, Date.today().setTimeToNow() )
     
-    if toSend == 0 or toSend == 1    
-      sendEmail( currPic.date, currPic.email, pic )
+    if toSend >= 0
+      sendEmail( currPic, pic )
     
 
-treeWalk()     
+treeWalk()
