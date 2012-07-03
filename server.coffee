@@ -4,6 +4,7 @@ schedule= require('node-schedule')
 require('datejs')
 fs = require('fs');
 
+postcards = require('./postcards')
 
 # Filename must be formatted: 
 # christina.lin.yang@gmail.com_2012.06.30-08/43/02_neptune
@@ -11,16 +12,6 @@ fs = require('fs');
 
 
 PIC_FOLDER = "pics"
-
-postcards = 
-  neptune: 
-    hours: 4
-    minutes: 12
-  voyager: 
-    hours: 16           
-  proxima:
-    years: 4
-    days: 73     
 
 
 
@@ -45,7 +36,7 @@ parseDataEmail = (filename)=>
 
 calculateSendDate = (cardCreated, cardOrigin) =>
   
-  now = Date.today().setTimeToNow() 
+  now = Date.today().setTimeToNow()
   now.add( postcards[ cardOrigin ] )  
  
  
