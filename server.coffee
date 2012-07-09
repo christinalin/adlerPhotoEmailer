@@ -44,8 +44,8 @@ parseDataEmail = (filename)=>
 # - - - - - Calculate the date to send the email 
 
 calculateSendDate = (cardCreated, cardOrigin) =>
-   
-  cardCreated.add( postcards[ cardOrigin ] )  
+
+  cardCreated.add( postcards[ cardOrigin ] ) if postcards[ cardOrigin ] else 0 
  
  
  
@@ -67,7 +67,7 @@ watch.createMonitor PIC_FOLDER, (monitor)=>
     fname = f.split("/")[1]
     details = parseDataEmail( fname )
     console.log "scheduling email"
-    sendEmail( details, fname )
+    sendEmail( details, fname ) if details.date
     
     
     
@@ -105,9 +105,9 @@ treeWalk = ->
   for pic in folder when pic isnt ".DS_Store"
     console.log "----------"
     currPic = parseDataEmail ( pic.toString() )
-    toSend = Date.compare( currPic.date, Date.today().setTimeToNow() )
+    toSend = if currPic.date then Date.compare( currPic.date, Date.today().setTimeToNow() ) else -1
     
-    if toSend >= 0 and currPic.email isnt "null"
+    if toSend >= 0 and currPic.email isnt "null" and currPic.date
       sendEmail( currPic, pic )
     
 
