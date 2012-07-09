@@ -12,7 +12,7 @@ postcards = require('./postcards')
 # email_name_year.month.year-hour/minute/second_origin.extension
 
 
-PIC_FOLDER = "pics"
+PIC_FOLDER = "../photos"
 template   = fs.readFileSync 'emailTemplate.eco', 'utf-8'
 
 
