@@ -21,16 +21,15 @@ template   = fs.readFileSync 'emailTemplate.eco', 'utf-8'
 
 parseDataEmail = (filename)=>
   file = filename.split("_")
-  
   emailAddress = file[0]
   personName = file[1]
   created = new Date( file[2] )
+  
   cardOrigin = file[3].substring(0, file[3].length-4) # remove .png
+  console.log "created on #{created} on #{cardOrigin}"
   
   newDate = calculateSendDate( created, cardOrigin )
-  
-  console.log "created on #{created}"
-  console.log "cardOrigin #{cardOrigin}"
+  console.log "sending on #{newDate}"
   
   email   : emailAddress
   person  : personName
@@ -44,26 +43,26 @@ parseDataEmail = (filename)=>
 # - - - - - Calculate the date to send the email 
 
 calculateSendDate = (cardCreated, cardOrigin) =>
-
-  cardCreated.add( postcards[ cardOrigin ] ) if postcards[ cardOrigin ] else 0 
- 
+  
+  if postcards[cardOrigin]
+    cardCreated.add( postcards[ cardOrigin ] ) 
+  else
+    0
  
  
 # - - - - - Connect to the mail server 
  
 server  = email.server.connect
-   user     : "adleremailer2" 
-   password : "Neptune2012!"
-   host     : "smtp.gmail.com"
-   ssl      : true
    
+   host     : "mail.adlerplanetarium.org"
+   ssl      : false
+   domain   : "adlerplanetarium.org"
    
-
 # - - - - - Monitor the picture folder for filechanges
 
 watch.createMonitor PIC_FOLDER, (monitor)=> 
   monitor.on "created", (f,stat)=>
-    
+    console.log "------- file change --------"
     fname = f.split("/")[1]
     details = parseDataEmail( fname )
     console.log "scheduling email"
@@ -77,23 +76,24 @@ watch.createMonitor PIC_FOLDER, (monitor)=>
 sendEmail = (details, fname) =>
   
   schedule.scheduleJob details.date, =>
-  console.log "sending to #{details.email} on #{details.date}"
+  
+    console.log "sending to #{details.email} on #{details.date}"
   
   
-  server.send
-    text:    eco.render template, details
-    from:    "The adler <username@gmail.com>"
-    to:      details.email
-    subject: "testing emailjs"
-    attachment: [
-      data: "<html>i <i>hope</i> this works!</html>"          
-      ,
-      type: "image/png"
-      path: "#{PIC_FOLDER}/#{fname}"
-      ]
+    server.send
+      text:    eco.render template, details
+      from:    "The adler <username@gmail.com>"
+      to:      details.email
+      subject: "testing emailjs"
+      attachment: [
+        data: "<html>i <i>hope</i> this works!</html>"          
+        ,
+        type: "image/png"
+        path: "#{PIC_FOLDER}/#{fname}"
+        ]
     
-  , (err, message)=>
-    console.log err || message
+    , (err, message)=>
+      console.log err || message
         
         
 # - - - - - treeWalk 
@@ -105,7 +105,10 @@ treeWalk = ->
   for pic in folder when pic isnt ".DS_Store"
     console.log "----------"
     currPic = parseDataEmail ( pic.toString() )
-    toSend = if currPic.date then Date.compare( currPic.date, Date.today().setTimeToNow() ) else -1
+    if currPic.date
+      toSend = Date.compare( currPic.date, Date.today().setTimeToNow() )
+    else
+      toSend = -1
     
     if toSend >= 0 and currPic.email isnt "null" and currPic.date
       sendEmail( currPic, pic )

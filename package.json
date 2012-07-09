@@ -4,10 +4,10 @@
   , "private": true
   , "dependencies": {
       "coffee-script" : "latest",
-      "emailjs": "latest",
+      "emailjs": "git://github.com/christinalin/emailjs.git",
       "node-schedule" : "latest",
       "watch" : "latest",
       "datejs" : "latest",
-      "fs" : "latest"
-  }
+      "eco": "latest"
+        }
 }
