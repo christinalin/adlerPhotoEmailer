@@ -8,8 +8,8 @@ eco = require('eco')
 postcards = require('./postcards')
 
 # Filename must be formatted: 
-# christina.lin.yang@gmail.com_2012.06.30-08/43/02_neptune.png
-# email_year.month.year-hour/minute/second_origin.extension
+# christina.lin.yang@gmail.com_christina_2012.06.30-08/43/02_neptune.png
+# email_name_year.month.year-hour/minute/second_origin.extension
 
 
 PIC_FOLDER = "pics"
@@ -23,14 +23,17 @@ parseDataEmail = (filename)=>
   file = filename.split("_")
   
   emailAddress = file[0]
-  created = new Date( file[1] )
-  cardOrigin = file[2].substring(0, file[2].length-4) # remove .png
+  personName = file[1]
+  created = new Date( file[2] )
+  cardOrigin = file[3].substring(0, file[3].length-4) # remove .png
   
   newDate = calculateSendDate( created, cardOrigin )
   
   console.log "created on #{created}"
+  console.log "cardOrigin #{cardOrigin}"
   
   email   : emailAddress
+  person  : personName
   date    : newDate
   created : created
   origin  : cardOrigin
@@ -41,7 +44,7 @@ parseDataEmail = (filename)=>
 # - - - - - Calculate the date to send the email 
 
 calculateSendDate = (cardCreated, cardOrigin) =>
-  
+   
   cardCreated.add( postcards[ cardOrigin ] )  
  
  
@@ -104,7 +107,7 @@ treeWalk = ->
     currPic = parseDataEmail ( pic.toString() )
     toSend = Date.compare( currPic.date, Date.today().setTimeToNow() )
     
-    if toSend >= 0
+    if toSend >= 0 and currPic.email isnt "null"
       sendEmail( currPic, pic )
     
 
