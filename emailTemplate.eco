@@ -1,0 +1,6 @@
+Greetings from the Universe!
+
+On <%=@created.toString('MMMM dS, yyyy')%>, <%=@person%> sent this from the Adler Planetarium's exhibition The Universe: A Walk through Space and Time. Traveling at the speed of light, a message from Neptune would take a long time to reach you.
+
+Hope to see you soon,
+The Adler Planetarium
