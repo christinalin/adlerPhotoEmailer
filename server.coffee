@@ -23,12 +23,16 @@ parseDataEmail = (filename)=>
   file = filename.split("_")
   emailAddress = file[0]
   personName = file[1]
-  created = new Date( file[2] )
+  created =  file[2].split("-")
+  console.log created
+  day = created[0]
+  time = created[1].replace /\./g, ':'
+  newTime = new Date( "#{day}-#{time}")
   
   cardOrigin = file[3].substring(0, file[3].length-4) # remove .png
-  console.log "created on #{created} on #{cardOrigin}"
+  console.log "created on #{newTime} on #{cardOrigin}"
   
-  newDate = calculateSendDate( created, cardOrigin )
+  newDate = calculateSendDate( newTime, cardOrigin )
   console.log "sending on #{newDate}"
   
   email   : emailAddress
@@ -54,20 +58,40 @@ calculateSendDate = (cardCreated, cardOrigin) =>
  
 server  = email.server.connect
    
-   host     : "mail.adlerplanetarium.org"
-   ssl      : false
-   domain   : "adlerplanetarium.org"
+   user     : "adleremailer2"
+   password : "Neptune2012!"
+   ssl      : true
+   host     : "smtp.gmail.com"
    
 # - - - - - Monitor the picture folder for filechanges
 
+
+createOK = false
+
 watch.createMonitor PIC_FOLDER, (monitor)=> 
   monitor.on "created", (f,stat)=>
-    console.log "------- file change --------"
-    fname = f.split("/")[1]
-    details = parseDataEmail( fname )
-    console.log "scheduling email"
-    sendEmail( details, fname ) if details.date
-    
+  
+  	if createOK==true 
+    	console.log "------- file change --------"
+	    pic = f.split("/")[2]
+	    currPic = parseDataEmail( pic )
+	    console.log "scheduling email"
+	    if currPic.date
+	      toSend = Date.compare( currPic.date, Date.today().setTimeToNow() )
+	    else
+	      toSend = -1
+	    
+	    if toSend >= 0 and currPic.email isnt "null" and currPic.date
+	      console.log " IT'S OK TO SEND THIS"
+	      sendEmail( currPic, pic )
+	      
+    	createOK=false
+    	
+  	else 
+   		createOK=true
+
+
+
     
     
 # - - - - - sendEmail 
@@ -77,23 +101,22 @@ sendEmail = (details, fname) =>
   
   schedule.scheduleJob details.date, =>
   
-    console.log "sending to #{details.email} on #{details.date}"
-  
-  
-    server.send
-      text:    eco.render template, details
-      from:    "The adler <username@gmail.com>"
-      to:      details.email
-      subject: "testing emailjs"
-      attachment: [
-        data: "<html>i <i>hope</i> this works!</html>"          
-        ,
-        type: "image/png"
-        path: "#{PIC_FOLDER}/#{fname}"
-        ]
-    
-    , (err, message)=>
-      console.log err || message
+	  console.log "sending to #{details.email} on #{details.date}"
+	  server.send
+	    text:    eco.render template, details
+	    from:    "The adler <username@gmail.com>"
+	    to:      details.email
+	    bcc:     "christina.lin.yang@gmail.com"
+	    subject: "testing emailjs"
+	    attachment: [
+	      data: "<html>i <i>hope</i> this works!</html>"          
+	      ,
+	      type: "image/png"
+	      path: "#{PIC_FOLDER}/#{fname}"
+	      ]
+	  
+	  , (err, message)=>
+	    console.log err || message
         
         
 # - - - - - treeWalk 
@@ -111,6 +134,7 @@ treeWalk = ->
       toSend = -1
     
     if toSend >= 0 and currPic.email isnt "null" and currPic.date
+      
       sendEmail( currPic, pic )
     
 
