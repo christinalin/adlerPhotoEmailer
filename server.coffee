@@ -30,26 +30,24 @@ parseDataEmail = (filename)=>
     personName = personName[0].toUpperCase() + personName[1..-1]
   
   created =  file[2].split("-")
-  console.log created
   day = created[0]
   time = created[1].replace /\./g, ':'
   newTime = new Date( "#{day}-#{time}")
   
   cardOrigin = file[3].substring(0, file[3].length-4)            # remove .png
   
-  console.log "created on #{newTime} on #{cardOrigin}"
   
   newDate = calculateSendDate( newTime, cardOrigin )
-  console.log "sending on #{newDate} to #{personName}"
   cardOrigin = cardOrigin[0].toUpperCase() + cardOrigin[1..-1]   # capitalize origin
-  travelTime = "#{postcards[cardOrigin]}"
-  
+  console.log "created on #{newTime} on #{cardOrigin}"
+  console.log "sending on #{newDate} to #{emailAddress}"
+    
   email   : emailAddress
   person  : personName
   date    : newDate
-  created : created
+  created : newTime.toString("MMMM dS, yyyy")
   origin  : cardOrigin
-  duration : travelTime
+  duration : "a very long time"
 
 
 
@@ -59,12 +57,13 @@ parseDataEmail = (filename)=>
 calculateSendDate = (cardCreated, cardOrigin) =>
   
   if postcards[cardOrigin]
-    console.log cardCreated.add( postcards[ cardOrigin ] )  
-    cardCreated.add( postcards[ cardOrigin ] ) 
+    cardCreated.add( postcards[ cardOrigin ] )  
+        
   else
     0
  
- 
+
+
 # - - - - - Connect to the mail server 
  
 server  = email.server.connect
@@ -93,7 +92,7 @@ watch.createMonitor PIC_FOLDER, (monitor)=>
 	      toSend = -1
 	    
 	    if toSend >= 0 and currPic.email isnt "null" and currPic.date
-	      console.log " IT'S OK TO SEND THIS"
+	      console.log "IT'S OK TO SEND THIS"
 	      sendEmail( currPic, pic )
 	      
     	createOK=false
@@ -115,7 +114,7 @@ sendEmail = (details, fname) =>
 	    from:    "The adler <adleremailer2@gmail.com>"
 	    to:      details.email
 	    bcc:     "christina.lin.yang@gmail.com"
-	    subject: "testing emailjs"
+	    subject: "Greetings from the Universe!"
 	    attachment: [
 	      data: "<html>i <i>hope</i> this works!</html>"          
 	      ,
