@@ -40,14 +40,16 @@ parseDataEmail = (filename)=>
   newDate = calculateSendDate( newTime, cardOrigin )
   cardOrigin = cardOrigin[0].toUpperCase() + cardOrigin[1..-1]   # capitalize origin
   console.log "created on #{newTime} on #{cardOrigin}"
-  console.log "sending on #{newDate} to #{emailAddress}"
+  console.log "sending on #{newDate.sendDate} to #{emailAddress}"
+  
+  console.log newDate.timeDelayed
     
   email   : emailAddress
   person  : personName
-  date    : newDate
+  date    : newDate.sendDate
   created : newTime.toString("MMMM dS, yyyy")
   origin  : cardOrigin
-  duration : "a very long time"
+  duration : newDate.timeDelayed
 
 
 
@@ -55,12 +57,18 @@ parseDataEmail = (filename)=>
 # - - - - - Calculate the date to send the email 
 
 calculateSendDate = (cardCreated, cardOrigin) =>
+  location = postcards[ cardOrigin ]
+  formatted = 0
+  sendDate  = 0
   
-  if postcards[cardOrigin]
-    cardCreated.add( postcards[ cardOrigin ] )  
-        
-  else
-    0
+  if location
+    duration =  ("#{len} #{unit}" for unit, len of location)
+    formatted = duration.join(" and ")
+     
+    console.log formatted
+    
+  timeDelayed : formatted
+  sendDate    : cardCreated.add( location ) 
  
 
 
