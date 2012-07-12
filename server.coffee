@@ -27,7 +27,7 @@ parseDataEmail = (filename)=>
   if personName == "null"
     personName = "Someone"
   else
-    personName = personName[0].toUpperCase() + personName[1..-1]
+    personName = personName
   
   created =  file[2].split("-")
   day = created[0]
@@ -36,14 +36,9 @@ parseDataEmail = (filename)=>
   
   cardOrigin = file[3].substring(0, file[3].length-4)            # remove .png
   
-  
   newDate = calculateSendDate( newTime, cardOrigin )
   cardOrigin = cardOrigin[0].toUpperCase() + cardOrigin[1..-1]   # capitalize origin
-  console.log "created on #{newTime} on #{cardOrigin}"
-  console.log "sending on #{newDate.sendDate} to #{emailAddress}"
-  
-  console.log newDate.timeDelayed
-    
+      
   email   : emailAddress
   person  : personName
   date    : newDate.sendDate
@@ -65,7 +60,6 @@ calculateSendDate = (cardCreated, cardOrigin) =>
     duration =  ("#{len} #{unit}" for unit, len of location)
     formatted = duration.join(" and ")
      
-    console.log formatted
     
   timeDelayed : formatted
   sendDate    : cardCreated.add( location ) 
@@ -76,10 +70,9 @@ calculateSendDate = (cardCreated, cardOrigin) =>
  
 server  = email.server.connect
    
-   user     : "adleremailer2"
-   password : "Neptune2012!"
-   ssl      : true
-   host     : "smtp.gmail.com"
+   ssl      : false
+   host     : "mail.adlerplanetarium.org"
+   domain   : "adlerplanetarium.org"
    
 # - - - - - Monitor the picture folder for filechanges
 
@@ -90,17 +83,15 @@ watch.createMonitor PIC_FOLDER, (monitor)=>
   monitor.on "created", (f,stat)=>
   
   	if createOK==true 
-    	console.log "------- file change --------"
+    	
 	    pic = f.split("/")[2]
 	    currPic = parseDataEmail( pic )
-	    console.log "scheduling email"
 	    if currPic.date
 	      toSend = Date.compare( currPic.date, Date.today().setTimeToNow() )
 	    else
 	      toSend = -1
 	    
 	    if toSend >= 0 and currPic.email isnt "null" and currPic.date
-	      console.log "IT'S OK TO SEND THIS"
 	      sendEmail( currPic, pic )
 	      
     	createOK=false
@@ -113,15 +104,14 @@ watch.createMonitor PIC_FOLDER, (monitor)=>
 # - - - - - Send an email based on a certain date 
 
 sendEmail = (details, fname) =>
-  
+  console.log "sending email!"
   schedule.scheduleJob details.date, =>
   
 	  console.log "sending to #{details.email} on #{details.date}"
 	  server.send
 	    text:    eco.render template, details
-	    from:    "The adler <adleremailer2@gmail.com>"
+	    from:    "The Adler Planetarium <adlerpostcard@adlerplanetarium.org>"
 	    to:      details.email
-	    bcc:     "christina.lin.yang@gmail.com"
 	    subject: "Greetings from the Universe!"
 	    attachment: [
 	      data: "<html>i <i>hope</i> this works!</html>"          
@@ -132,7 +122,7 @@ sendEmail = (details, fname) =>
 	      ]
 	  
 	  , (err, message)=>
-	    console.log err || message
+	    console.log err || "message sent to #{details.email}"
         
         
 # - - - - - treeWalk 
@@ -142,7 +132,7 @@ treeWalk = ->
   folder = fs.readdirSync(PIC_FOLDER)
   
   for pic in folder when pic isnt ".DS_Store"
-    console.log "----------"
+    
     currPic = parseDataEmail ( pic.toString() )
     if currPic.date
       toSend = Date.compare( currPic.date, Date.today().setTimeToNow() )
